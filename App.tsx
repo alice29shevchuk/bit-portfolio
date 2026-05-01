@@ -13,6 +13,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import i18n from 'i18next';
 
 import { attachAuthInterceptors } from '@/api/authClient';
+import AppPrivacyShield from '@/components/AppPrivacyShield';
 import RootNavigator from '@/navigation/RootNavigator';
 import { queryClient, queryPersister } from '@/query/queryClient';
 import { hasStoredPin } from '@/security/pinStorage';
@@ -139,6 +140,7 @@ export default function App() {
                   <StatusBar style="dark" />
                   <NavigationRoot />
                 </NavigationContainer>
+                <AppPrivacyShield />
               </AuthBootstrap>
             </PersistQueryClientProvider>
           </PersistGate>
