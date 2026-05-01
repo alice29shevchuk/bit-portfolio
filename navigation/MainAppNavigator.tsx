@@ -2,6 +2,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import PortfolioScreen from '@/screens/PortfolioScreen';
 import PostDetailScreen from '@/screens/PostDetailScreen';
@@ -17,6 +18,9 @@ const Stack = createNativeStackNavigator<MainAppStackParamList>();
 
 function MainTabs() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const bottomInset = Math.max(insets.bottom, 12);
+  const tabBarHeight = 52 + bottomInset;
 
   return (
     <Tab.Navigator
@@ -27,8 +31,9 @@ function MainTabs() {
         tabBarStyle: {
           backgroundColor: colors.bg,
           borderTopColor: colors.border,
-          paddingTop: 6,
-          height: 62,
+          paddingTop: 8,
+          paddingBottom: bottomInset,
+          height: tabBarHeight,
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}

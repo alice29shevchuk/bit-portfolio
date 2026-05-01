@@ -109,7 +109,7 @@ export default function SettingsScreen({ navigation }: Props) {
 
         <Text style={styles.section}>{t('settings.basicSection')}</Text>
         <Pressable
-          style={styles.row}
+          style={styles.menuCard}
           onPress={() => navigation.navigate('Language')}
         >
           <MaterialCommunityIcons name="earth" size={22} color={colors.accent} />
@@ -118,7 +118,7 @@ export default function SettingsScreen({ navigation }: Props) {
         </Pressable>
 
         <Text style={styles.section}>{t('settings.otherSection')}</Text>
-        <Pressable style={styles.row} onPress={handleLogout}>
+        <Pressable style={styles.menuCard} onPress={handleLogout}>
           <MaterialCommunityIcons name="logout-variant" size={22} color={colors.accent} />
           <Text style={styles.rowLabel}>{t('settings.logout')}</Text>
           <MaterialCommunityIcons name="chevron-right" size={22} color={colors.muted} />
@@ -165,16 +165,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: colors.muted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    letterSpacing: 0.3,
   },
-  row: {
+  menuCard: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginHorizontal: 22,
+    marginBottom: 14,
     paddingVertical: 16,
-    paddingHorizontal: 22,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    paddingHorizontal: 18,
+    borderRadius: radius.lg,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
     gap: 14,
   },
   rowLabel: { flex: 1, fontSize: 17, fontWeight: '600', color: colors.text },
