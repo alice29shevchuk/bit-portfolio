@@ -1,0 +1,135 @@
+{
+  "common": {
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "save": "Save",
+    "back": "Back",
+    "search": "Search posts…",
+    "noResults": "No matching posts",
+    "offlineHint": "Showing cached data when offline."
+  },
+  "welcome": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "decorLine": "Lorem ipsum {{n}}"
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "subtitle": "Your holdings overview",
+    "hint": "Track wallets and positions — layout preview."
+  },
+  "auth": {
+    "loginTitle": "Login",
+    "registerTitle": "Sign up",
+    "personalAccount": "Personal Account",
+    "username": "Username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "submitLogin": "Sign in",
+    "submitRegister": "Register",
+    "goRegister": "Create account",
+    "goLogin": "Already have an account? Sign in",
+    "loginError": "Could not sign in. Check credentials.",
+    "invalidCredentials": "Wrong username or password.",
+    "name": "Full name",
+    "email": "Email",
+    "loginUsernameLabel": "Username",
+    "loginUsernameHelp": "Use a login from the DummyJSON demo database — not the email from sign-up. Example: emilys",
+    "afterRegisterTitle": "Almost done",
+    "afterRegisterMessage": "Sign-up only checks your fields on the device. DummyJSON does not store new users, so your email/password cannot be used to log in.\n\nUse the test account:\nUsername: emilys\nPassword: emilyspass\n\n(Full list: dummyjson.com/users)",
+    "afterRegister": "OK",
+    "usernameHint": "Use a DummyJSON user, e.g. emilys",
+    "passwordHintDummy": "Test password is often username + \"pass\" (e.g. emilyspass)."
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "emailInvalid": "Enter a valid email",
+    "passwordRules": "8–64 chars with upper, lower, number and symbol",
+    "pinMatch": "PINs must match",
+    "pinDigits": "Enter exactly 5 digits"
+  },
+  "pin": {
+    "createTitle": "Create PIN",
+    "createTitleLong": "Create a pin code",
+    "repeatTitleLong": "Repeat a pin code",
+    "confirmTitle": "Confirm PIN",
+    "unlockTitle": "Enter PIN",
+    "createSubtitle": "Protect your session on this device.",
+    "unlockSubtitle": "Unlock with your PIN or biometrics.",
+    "submitCreate": "Save PIN",
+    "wrongPin": "Incorrect PIN",
+    "pinLabel": "PIN",
+    "confirmLabel": "Confirm PIN",
+    "enterDigits": "Enter {{n}} digit code",
+    "enterDigitsShort": "Enter {{n}}-digit code:",
+    "saveError": "Could not save your PIN to secure storage. Try again."
+  },
+  "unlock": {
+    "changeAccount": "Change Account",
+    "changeAccountConfirm": "You will be signed out on this device."
+  },
+  "biometric": {
+    "use": "Face ID / Biometrics",
+    "setupTitle": "Enable biometrics?",
+    "setupBody": "Unlock faster next time using Face ID or fingerprint.",
+    "enable": "Enable",
+    "skip": "Not now",
+    "promptUnlock": "Authenticate to continue",
+    "systemEnrollmentPrompt": "Allow Face ID / biometrics for quick unlock next time.",
+    "unlockFailed": "Face ID did not open (Expo Go limits this). Use PIN below or run expo run:ios for a dev build."
+  },
+  "tabs": {
+    "home": "Home",
+    "portfolio": "Portfolio",
+    "search": "Search",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "home": {
+    "greeting": "Hello, {{name}}",
+    "welcomeLine": "Hi, welcome",
+    "personalAdvisor": "Personal Advisor",
+    "personalAdvisorBody": "Your dedicated specialist helps you stay on track with tailored guidance.",
+    "beforeStart": "Before you Start",
+    "beforeStartBody": "Review key documents and confirm your profile information.",
+    "posts": "Posts",
+    "seeAll": "See all",
+    "testTask": "Test task",
+    "testTaskBody": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    "goToCall": "Go to call",
+    "linkBank": "Link your bank account",
+    "addWallet": "Add your wallet",
+    "steps": "{{n}} steps"
+  },
+  "search": {
+    "placeholder": "Search Products…",
+    "nameLabel": "Name:"
+  },
+  "post": {
+    "title": "Post",
+    "authorId": "Author user ID",
+    "errorLoad": "Could not load post.",
+    "about": "About",
+    "comments": "Comments",
+    "mockComment1": "Great article, very helpful overview!",
+    "mockComment2": "Thanks for sharing — saved this for later.",
+    "mockComment3": "Could you add more detail on the second part?"
+  },
+  "settings": {
+    "title": "Settings",
+    "basicSection": "Basic",
+    "otherSection": "Other",
+    "profile": "Profile",
+    "language": "Language",
+    "english": "English",
+    "arabic": "Arabic",
+    "biometrics": "Face ID / Biometrics",
+    "logout": "Log out",
+    "logoutConfirm": "You will need to sign in again.",
+    "displayName": "Display name",
+    "pickPhoto": "Change photo",
+    "permissionDenied": "Photo library access was denied.",
+    "restartForRtl": "Restarting for layout direction…",
+    "biometricUnavailable": "Biometrics are not available on this device."
+  }
+}

@@ -1,0 +1,16 @@
+export const colors = {
+  bg: '#FFFFFF',
+  card: '#FFFFFF',
+  cardMuted: '#F5F5F5',
+  border: '#E8E8E8',
+  text: '#1A1A1A',
+  muted: '#828282',
+  mutedDark: '#4F4F4F',
+  accent: '#F7931A',
+  accentLight: '#FFA726',
+  accentDark: '#E8830D',
+  onAccent: '#FFFFFF',
+  danger: '#EB5757',
+  pinkTint: '#FFE8E8',
+  shadow: 'rgba(0,0,0,0.08)',
+};
