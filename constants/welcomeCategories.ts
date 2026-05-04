@@ -1,4 +1,3 @@
-/** Metro asset ids from `require('*.svg')`. */
 export type WelcomeClusterIcons = readonly [number, number, number];
 
 const ICON_PLACEHOLDER = require('../assets/images/welcome-category-placeholder.svg');
@@ -27,7 +26,6 @@ function triplePlaceholder(): WelcomeClusterIcons {
   return [ICON_PLACEHOLDER, ICON_PLACEHOLDER, ICON_PLACEHOLDER];
 }
 
-/** Fallback для карточек без своего набора иконок. */
 export const defaultWelcomeClusterIcons: WelcomeClusterIcons = triplePlaceholder();
 
 export const welcomeCategories = {

@@ -3,11 +3,9 @@ import { StyleSheet, View } from 'react-native';
 
 type Props = {
   size?: number;
-  /** Metro asset id for bundled `.svg`; defaults to placeholder. */
   source?: number;
 };
 
-/** Bundled SVG via `expo-image`. Default asset: `welcome-category-placeholder.svg`. */
 const DEFAULT_SOURCE = require('../assets/images/welcome-category-placeholder.svg');
 
 export default function WelcomeCategoryPlaceholderIcon({

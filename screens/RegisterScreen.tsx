@@ -25,7 +25,6 @@ import { registerSchema, type RegisterFormValues } from '@/utils/validation';
 
 const REGISTER_HEADER_ART = require('../assets/images/register-form-header.svg');
 
-/** Как на Login — для full-bleed сепаратора. */
 const FORM_HORIZONTAL_PADDING = 22;
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;

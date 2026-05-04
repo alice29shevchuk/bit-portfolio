@@ -29,12 +29,10 @@ import { biometricPromptOptions } from '@/utils/biometrics';
 
 const PIN_SETUP_ICON = require('../assets/images/pin-setup-icon.svg');
 
-/** Как на Login — full-bleed сепараторы. */
 const FORM_HORIZONTAL_PADDING = 22;
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreatePin'>;
 
-/** Ключи i18n: «PINs must match» показываем над верхним сепаратором. */
 type CreatePinErrorKey =
   | 'validation.pinDigits'
   | 'validation.pinMatch'

@@ -14,7 +14,6 @@ type Props = {
   children: ReactNode;
 };
 
-/** Серый верх со стрелкой «назад», ниже белая панель со скруглением — макет login/register. */
 export default function AuthSheetChrome({ onBack, children }: Props) {
   return (
     <View style={styles.root}>

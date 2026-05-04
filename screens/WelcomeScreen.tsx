@@ -25,17 +25,13 @@ const COL_GAP = 10;
 const ROW_GAP = 10;
 const SCREEN_PAD = 22;
 
-/** Должен совпадать с `minHeight` у `WelcomeCategoryCard`. */
 const CATEGORY_CARD_MIN_HEIGHT = 136;
 
-/** Правая колонка начинается чуть ниже середины первой левой карточки. */
 const RIGHT_COL_START_FRAC = 0.52;
 
 const WELCOME_BITCOIN_VECTOR = require('../assets/images/welcome-bitcoin-vector.svg');
-/** Тот же арт, что и у шапки auth (`bg.svg`). */
 const WELCOME_FOOTER_BG = require('../assets/images/auth-header-bg.svg');
 
-/** viewBox Vector.svg: 62×82 */
 const VECTOR_ASPECT = 82 / 62;
 
 export default function WelcomeScreen({ navigation }: Props) {

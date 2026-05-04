@@ -9,9 +9,7 @@ import { colors } from '@/theme/colors';
 type Props = {
   title: string;
   subtitle: string;
-  /** Заменяет стандартную иконку аккаунта (например SVG из assets). */
   leadingImage?: ComponentProps<typeof Image>['source'];
-  /** Размер контейнера под арт (по умолчанию 49×49). */
   leadingImageStyle?: StyleProp<ImageStyle>;
 };
 

@@ -29,10 +29,8 @@ import { radius } from '@/theme/radius';
 
 const LOGIN_HEADER_ART = require('../assets/images/login-form-header.svg');
 
-/** Совпадает с горизонтальным паддингом формы — для full-bleed сепаратора. */
 const FORM_HORIZONTAL_PADDING = 22;
 
-/** Тонкий красный «i» при ошибке входа (контур, без заливки круга). */
 function FieldErrorHintIcon() {
   return (
     <MaterialCommunityIcons
