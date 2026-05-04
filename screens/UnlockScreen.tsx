@@ -1,4 +1,5 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Image } from 'expo-image';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,7 +9,9 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 
 import PinDots from '@/components/PinDots';
@@ -25,6 +28,10 @@ import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
 import { authenticateBiometricDetailed } from '@/utils/biometrics';
 
+const HEADER_ART = require('../assets/images/login-form-header.svg');
+
+const FORM_HORIZONTAL_PADDING = 22;
+
 const SILENT_BIOMETRIC_ERRORS = new Set([
   'user_cancel',
   'system_cancel',
@@ -40,6 +47,10 @@ export default function UnlockScreen({ navigation }: Props) {
   const [entry, setEntry] = useState('');
   const [error, setError] = useState<string | null>(null);
   const autoBioAttempted = useRef(false);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({ headerShown: false });
+  }, [navigation]);
 
   const changeAccount = useCallback(() => {
     Alert.alert(t('unlock.changeAccount'), t('unlock.changeAccountConfirm'), [
@@ -58,17 +69,6 @@ export default function UnlockScreen({ navigation }: Props) {
       },
     ]);
   }, [dispatch, t]);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: '',
-      headerRight: () => (
-        <Pressable onPress={changeAccount} hitSlop={12}>
-          <Text style={styles.change}>{t('unlock.changeAccount')}</Text>
-        </Pressable>
-      ),
-    });
-  }, [navigation, changeAccount, t]);
 
   const emailLine = user?.email ?? user?.username ?? '';
 
@@ -131,55 +131,116 @@ export default function UnlockScreen({ navigation }: Props) {
   }, [tryBiometric]);
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.scroll}
-      style={styles.flex}
-      keyboardShouldPersistTaps="handled"
-    >
-      <Text style={styles.email}>{emailLine}</Text>
-      <Text style={styles.instruction}>
-        {t('pin.enterDigitsShort', { n: PIN_LENGTH })}
-      </Text>
-      <PinDots length={PIN_LENGTH} filled={entry.length} />
-      <PinKeypad onDigit={append} onDelete={del} />
-      {error ? <Text style={styles.err}>{error}</Text> : null}
-      <Pressable style={styles.primaryBtn} onPress={() => void submitPin()}>
-        <Text style={styles.primaryBtnText}>{t('common.continue')}</Text>
-      </Pressable>
-    </ScrollView>
+    <SafeAreaView style={styles.safeOuter} edges={['top', 'bottom']}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        style={styles.scrollFlex}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.topBlock}>
+          <Image
+            source={HEADER_ART}
+            style={styles.headerIcon}
+            contentFit="contain"
+          />
+          <Text style={styles.email}>{emailLine}</Text>
+          <Pressable
+            onPress={changeAccount}
+            hitSlop={12}
+            accessibilityRole="button"
+          >
+            <Text style={styles.changeAccountLink}>
+              {t('unlock.changeAccount')}
+            </Text>
+          </Pressable>
+          <Text style={styles.instruction}>
+            {t('pin.enterDigitsShort', { n: PIN_LENGTH })}
+          </Text>
+          <PinDots
+            length={PIN_LENGTH}
+            filled={entry.length}
+            style={styles.pinDots}
+          />
+        </View>
+
+        <View style={styles.bottomBlock}>
+          {error ? <Text style={styles.err}>{error}</Text> : null}
+          <View style={[styles.separator, styles.separatorAboveKeypad]} />
+          <PinKeypad onDigit={append} onDelete={del} />
+          <View style={[styles.separator, styles.separatorAboveContinue]} />
+          <Pressable style={styles.primaryBtn} onPress={() => void submitPin()}>
+            <Text style={styles.primaryBtnText}>{t('common.continue')}</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.bg },
+  safeOuter: { flex: 1, backgroundColor: colors.bg },
+  scrollFlex: { flex: 1 },
   scroll: {
-    paddingHorizontal: 22,
-    paddingTop: 12,
-    paddingBottom: 40,
-    alignItems: 'stretch',
+    flexGrow: 1,
+    paddingHorizontal: FORM_HORIZONTAL_PADDING,
+    paddingTop: 16,
+    paddingBottom: 24,
   },
-  change: { color: colors.accent, fontWeight: '700', fontSize: 15 },
+  topBlock: {
+    alignItems: 'center',
+  },
+  headerIcon: {
+    width: 49,
+    height: 49,
+    marginBottom: 16,
+  },
   email: {
     textAlign: 'center',
     color: colors.text,
     fontWeight: '600',
     fontSize: 16,
-    marginBottom: 6,
+    marginBottom: 8,
+    paddingHorizontal: 8,
+  },
+  changeAccountLink: {
+    color: colors.accent,
+    fontWeight: '600',
+    fontSize: 15,
+    marginBottom: 52,
   },
   instruction: {
     textAlign: 'center',
     color: colors.muted,
     fontSize: 14,
-    marginBottom: 4,
+    marginBottom: 10,
+  },
+  pinDots: {
+    marginTop: 0,
+  },
+  bottomBlock: {
+    marginTop: 'auto',
+    paddingTop: 8,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: colors.separator,
+    marginHorizontal: -FORM_HORIZONTAL_PADDING,
+  },
+  separatorAboveKeypad: {
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  separatorAboveContinue: {
+    marginTop: 16,
+    marginBottom: 20,
   },
   err: {
     color: colors.danger,
     textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   primaryBtn: {
-    marginTop: 28,
+    marginTop: 0,
     backgroundColor: colors.accent,
     paddingVertical: 17,
     borderRadius: radius.pill,
