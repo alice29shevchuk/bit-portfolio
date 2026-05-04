@@ -2,7 +2,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -29,21 +29,25 @@ type Props = CompositeScreenProps<
   NativeStackScreenProps<MainAppStackParamList>
 >;
 
+const SEARCH_DEBOUNCE_MS = 350;
+
 export default function SearchScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const [q, setQ] = useState('');
+  const [debouncedQ, setDebouncedQ] = useState('');
   const { data, isPending, isError } = useAllPosts();
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedQ(q.trim()), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(id);
+  }, [q]);
 
   const filtered = useMemo(() => {
     const list = data ?? [];
-    const needle = q.trim().toLowerCase();
+    const needle = debouncedQ.toLowerCase();
     if (!needle) return list;
-    return list.filter(
-      (p) =>
-        p.title.toLowerCase().includes(needle) ||
-        p.body.toLowerCase().includes(needle),
-    );
-  }, [data, q]);
+    return list.filter((p) => p.title.toLowerCase().includes(needle));
+  }, [data, debouncedQ]);
 
   const renderItem = ({ item }: { item: JsonPlaceholderPost }) => (
     <Pressable
@@ -101,10 +105,10 @@ export default function SearchScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: colors.surfaceGray },
   screenTitle: {
-    fontSize: 26,
-    fontWeight: '800',
+    fontSize: 22,
+    fontWeight: '600',
     color: colors.text,
     paddingHorizontal: 22,
     marginBottom: 16,
@@ -116,7 +120,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: radius.pill,
+    borderRadius: radius.lg,
     backgroundColor: colors.cardMuted,
     borderWidth: 1,
     borderColor: colors.border,
@@ -130,17 +134,17 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.card,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 8,
     elevation: 2,
   },
-  idLine: { fontSize: 15, color: colors.muted, marginBottom: 8 },
-  idBold: { fontWeight: '700', color: colors.text },
+  idLine: { fontSize: 15, fontWeight: '500', color: colors.text, marginBottom: 8 },
+  idBold: { fontWeight: '500', color: colors.text },
   nameLine: { fontSize: 15, color: colors.muted, lineHeight: 22 },
-  nameBold: { fontWeight: '700', color: colors.text },
+  nameBold: { fontWeight: '400', color: colors.muted },
   empty: { textAlign: 'center', color: colors.muted, marginTop: 24 },
   err: { color: colors.danger, textAlign: 'center', marginTop: 12 },
 });
