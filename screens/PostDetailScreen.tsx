@@ -1,6 +1,7 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,7 +14,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { usePostComments, usePostDetail } from '@/hooks/usePostsQueries';
+import type { JsonPlaceholderPost } from '@/api/postsApi';
+import {
+  postsListQueryKey,
+  usePostComments,
+  usePostDetail,
+} from '@/hooks/usePostsQueries';
 import type { MainAppStackParamList } from '@/navigation/types';
 import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
@@ -34,13 +40,18 @@ function capitalizeFirstLetter(text: string): string {
 export default function PostDetailScreen({ navigation, route }: Props) {
   const { t } = useTranslation();
   const postId = route.params.postId;
+  const queryClient = useQueryClient();
   const [heroHeight, setHeroHeight] = useState(0);
-  const { data, isPending, isError } = usePostDetail(postId);
-  const {
-    data: comments,
-    isPending: commentsPending,
-    isError: commentsError,
-  } = usePostComments(postId);
+  const listPosts = queryClient.getQueryData<JsonPlaceholderPost[]>(postsListQueryKey);
+  const postFromList = listPosts?.find((p) => p.id === postId);
+
+  const detailQuery = usePostDetail(postId);
+  const post = detailQuery.data ?? postFromList;
+
+  const commentsQuery = usePostComments(postId);
+  const comments = commentsQuery.data ?? [];
+  const commentsPending = commentsQuery.isPending && comments.length === 0;
+  const commentsShowError = commentsQuery.isError && comments.length === 0;
 
   const scrollPaddingTop =
     heroHeight > 0 ? heroHeight + CONTENT_GAP_BELOW_HERO : SCROLL_TOP_FALLBACK;
@@ -55,25 +66,25 @@ export default function PostDetailScreen({ navigation, route }: Props) {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {isError ? (
+        {detailQuery.isError && !post ? (
           <Text style={styles.err}>{t('post.errorLoad')}</Text>
         ) : null}
 
-        {data ? (
+        {post ? (
           <>
             <Text style={styles.aboutHeading}>{t('post.about')}</Text>
             <View style={styles.aboutCard}>
-              <Text style={styles.body}>{capitalizeFirstLetter(data.body)}</Text>
+              <Text style={styles.body}>{capitalizeFirstLetter(post.body)}</Text>
             </View>
 
             <Text style={styles.commentsHeading}>{t('post.comments')}</Text>
             {commentsPending ? (
               <ActivityIndicator color={colors.accent} style={styles.commentsSpinner} />
             ) : null}
-            {commentsError ? (
+            {commentsShowError ? (
               <Text style={styles.err}>{t('post.commentsLoadError')}</Text>
             ) : null}
-            {(comments ?? []).map((c) => (
+            {comments.map((c) => (
               <View key={c.id} style={styles.commentCard}>
                 <Text style={styles.cName}>{capitalizeFirstLetter(c.name)}</Text>
                 <Text style={styles.cEmail}>{c.email}</Text>
@@ -102,10 +113,10 @@ export default function PostDetailScreen({ navigation, route }: Props) {
               </Pressable>
             </View>
 
-            {data ? (
+            {post ? (
               <View pointerEvents="none">
                 <Text style={styles.postTitleText} numberOfLines={5}>
-                  {capitalizeFirstLetter(data.title)}
+                  {capitalizeFirstLetter(post.title)}
                 </Text>
                 <Image
                   source={POST_DETAIL_HERO}
@@ -114,7 +125,7 @@ export default function PostDetailScreen({ navigation, route }: Props) {
                   accessibilityIgnoresInvertColors
                 />
               </View>
-            ) : isPending ? (
+            ) : detailQuery.isPending ? (
               <View pointerEvents="none" style={styles.heroSpinnerWrap}>
                 <ActivityIndicator color={colors.accent} style={styles.heroSpinner} />
               </View>

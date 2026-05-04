@@ -4,7 +4,8 @@ import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -17,7 +18,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 
-import { useHomePosts } from '@/hooks/usePostsQueries';
+import type { JsonPlaceholderPost } from '@/api/postsApi';
+import {
+  prefetchPostDetailAndComments,
+  prefetchPostsDetailAndCommentsBatched,
+  usePostsList,
+} from '@/hooks/usePostsQueries';
 import type {
   MainAppStackParamList,
   MainTabParamList,
@@ -26,6 +32,7 @@ import type { RootState } from '@/store/index';
 import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
 import { resolveDisplayName } from '@/utils/displayName';
+import { seedPostDetailFromList } from '@/utils/postOfflineCache';
 
 const TASK_CARD_ART = require('../assets/images/home-test-task.png');
 const BEFORE_CARD_LINK_ICON = require('../assets/images/before-card-link-icon.svg');
@@ -46,14 +53,25 @@ type Props = CompositeScreenProps<
 
 export default function HomeScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [heroHeight, setHeroHeight] = useState(0);
   const user = useSelector((s: RootState) => s.auth.user);
   const override = useSelector((s: RootState) => s.settings.displayNameOverride);
   const name = resolveDisplayName(user, override) || '—';
-  const { data, isPending, isError } = useHomePosts();
+  const { data: postsList, isPending, isError } = usePostsList();
+  const homePosts = postsList?.slice(0, 3) ?? [];
 
-  const openPost = (id: number) => {
-    navigation.navigate('PostDetail', { postId: id });
+  useEffect(() => {
+    if (!postsList?.length) return;
+    void prefetchPostsDetailAndCommentsBatched(queryClient, postsList, {
+      concurrency: 4,
+    });
+  }, [queryClient, postsList]);
+
+  const openPost = (post: JsonPlaceholderPost) => {
+    seedPostDetailFromList(queryClient, post);
+    void prefetchPostDetailAndComments(queryClient, post.id);
+    navigation.navigate('PostDetail', { postId: post.id });
   };
 
   const scrollPaddingTop =
@@ -163,10 +181,10 @@ export default function HomeScreen({ navigation }: Props) {
         ) : null}
 
         <View style={styles.postCards}>
-          {(data ?? []).map((post) => (
+          {homePosts.map((post) => (
             <Pressable
               key={post.id}
-              onPress={() => openPost(post.id)}
+              onPress={() => openPost(post)}
               style={styles.postCard}
             >
               <Text style={styles.postCardTitle} numberOfLines={3}>

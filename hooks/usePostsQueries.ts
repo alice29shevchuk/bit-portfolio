@@ -1,19 +1,58 @@
-import { useQuery } from '@tanstack/react-query';
+import { type QueryClient, useQuery } from '@tanstack/react-query';
 
-import { fetchCommentsByPostId, fetchPostById, fetchPosts } from '@/api/postsApi';
+import {
+  fetchCommentsByPostId,
+  fetchPostById,
+  fetchPosts,
+  type JsonPlaceholderPost,
+} from '@/api/postsApi';
 
-export function useHomePosts() {
+export const postsListQueryKey = ['posts', 'list'] as const;
+
+export function usePostsList() {
   return useQuery({
-    queryKey: ['posts', 'home', 3],
-    queryFn: () => fetchPosts(3),
+    queryKey: postsListQueryKey,
+    queryFn: () => fetchPosts(),
   });
 }
 
-export function useAllPosts() {
-  return useQuery({
-    queryKey: ['posts', 'all'],
-    queryFn: () => fetchPosts(),
-  });
+export async function prefetchPostDetailAndComments(
+  queryClient: QueryClient,
+  postId: number,
+): Promise<void> {
+  await Promise.all([
+    queryClient.prefetchQuery({
+      queryKey: ['posts', 'detail', postId],
+      queryFn: () => fetchPostById(postId),
+    }),
+    queryClient.prefetchQuery({
+      queryKey: ['posts', 'comments', postId],
+      queryFn: () => fetchCommentsByPostId(postId),
+    }),
+  ]);
+}
+
+export async function prefetchPostsDetailAndCommentsBatched(
+  queryClient: QueryClient,
+  posts: JsonPlaceholderPost[],
+  options?: { limit?: number; concurrency?: number },
+): Promise<void> {
+  /** By default prefetch details for every post in this list (cap with `limit` if needed). */
+  const limit = options?.limit ?? posts.length;
+  const concurrency = Math.max(1, options?.concurrency ?? 4);
+  const slice = posts.slice(0, limit);
+  let cursor = 0;
+
+  async function worker(): Promise<void> {
+    while (true) {
+      const i = cursor++;
+      if (i >= slice.length) return;
+      const p = slice[i];
+      await prefetchPostDetailAndComments(queryClient, p.id);
+    }
+  }
+
+  await Promise.all(Array.from({ length: concurrency }, () => worker()));
 }
 
 export function usePostDetail(id: number) {

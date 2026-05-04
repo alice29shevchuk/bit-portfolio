@@ -14,15 +14,20 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useQueryClient } from '@tanstack/react-query';
 
 import type { JsonPlaceholderPost } from '@/api/postsApi';
-import { useAllPosts } from '@/hooks/usePostsQueries';
+import {
+  prefetchPostDetailAndComments,
+  usePostsList,
+} from '@/hooks/usePostsQueries';
 import type {
   MainAppStackParamList,
   MainTabParamList,
 } from '@/navigation/types';
 import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
+import { seedPostDetailFromList } from '@/utils/postOfflineCache';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'SearchTab'>,
@@ -33,9 +38,10 @@ const SEARCH_DEBOUNCE_MS = 350;
 
 export default function SearchScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [q, setQ] = useState('');
   const [debouncedQ, setDebouncedQ] = useState('');
-  const { data, isPending, isError } = useAllPosts();
+  const { data, isPending, isError } = usePostsList();
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedQ(q.trim()), SEARCH_DEBOUNCE_MS);
@@ -49,11 +55,14 @@ export default function SearchScreen({ navigation }: Props) {
     return list.filter((p) => p.title.toLowerCase().includes(needle));
   }, [data, debouncedQ]);
 
+  const openPost = (item: JsonPlaceholderPost) => {
+    seedPostDetailFromList(queryClient, item);
+    void prefetchPostDetailAndComments(queryClient, item.id);
+    navigation.navigate('PostDetail', { postId: item.id });
+  };
+
   const renderItem = ({ item }: { item: JsonPlaceholderPost }) => (
-    <Pressable
-      onPress={() => navigation.navigate('PostDetail', { postId: item.id })}
-      style={styles.card}
-    >
+    <Pressable onPress={() => openPost(item)} style={styles.card}>
       <Text style={styles.idLine}>
         <Text style={styles.idBold}>ID: </Text>
         {item.id}
