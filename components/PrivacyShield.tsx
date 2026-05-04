@@ -17,7 +17,7 @@ export default function PrivacyShield({ visible }: Props) {
       pointerEvents="auto"
     >
       <View style={styles.fill}>
-        <BitcoinMark width={148} height={126} />
+        <BitcoinMark width={132} height={132} />
       </View>
     </View>
   );

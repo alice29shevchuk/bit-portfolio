@@ -19,7 +19,7 @@ export default function PortfolioScreen(_props: Props) {
         <Text style={styles.sub}>{t('portfolio.subtitle')}</Text>
       </View>
       <View style={styles.hero}>
-        <BitcoinMark size={72} />
+        <BitcoinMark width={72} height={72} />
         <Text style={styles.hint}>{t('portfolio.hint')}</Text>
       </View>
     </SafeAreaView>

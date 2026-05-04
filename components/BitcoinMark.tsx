@@ -2,18 +2,19 @@ import { StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 
 type Props = {
-  size?: number;
+  width?: number;
+  height?: number;
 };
 
 const SOURCE = require('../assets/images/bitcoin-mark.png');
 
-export default function BitcoinMark({ size = 96 }: Props) {
-  const r = Math.round(size * 0.22);
+export default function BitcoinMark({ width = 96, height = 96 }: Props) {
+  const r = Math.round(Math.min(width, height) * 0.22);
   return (
-    <View style={[styles.wrap, { width: size, height: size, borderRadius: r }]}>
+    <View style={[styles.wrap, { width, height, borderRadius: r }]}>
       <Image
         source={SOURCE}
-        style={{ width: size, height: size, borderRadius: r }}
+        style={{ width, height, borderRadius: r }}
         contentFit="contain"
       />
     </View>

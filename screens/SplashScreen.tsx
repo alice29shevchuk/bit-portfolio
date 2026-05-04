@@ -18,7 +18,7 @@ export default function SplashScreen({ navigation }: Props) {
 
   return (
     <View style={styles.flex}>
-      <BitcoinMark size={112} />
+      <BitcoinMark width={178} height={178} />
     </View>
   );
 }

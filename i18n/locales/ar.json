@@ -9,8 +9,16 @@
     "offlineHint": "عرض البيانات المخزنة عند عدم الاتصال."
   },
   "welcome": {
+    "title": "مرحبًا",
     "signIn": "تسجيل الدخول",
     "signUp": "إنشاء حساب",
+    "categories": {
+      "crowdLending": "التمويل الجماعي",
+      "crowdRealEstate": "العقارات الجماعية",
+      "commodities": "السلع",
+      "etfs": "صناديق المؤشرات",
+      "crypto": "العملات المشفرة"
+    },
     "decorLine": "نص تجريبي {{n}}"
   },
   "portfolio": {

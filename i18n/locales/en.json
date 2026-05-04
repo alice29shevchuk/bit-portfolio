@@ -9,8 +9,16 @@
     "offlineHint": "Showing cached data when offline."
   },
   "welcome": {
+    "title": "Welcome",
     "signIn": "Sign in",
     "signUp": "Sign up",
+    "categories": {
+      "crowdLending": "Crowd lending",
+      "crowdRealEstate": "Crowd real estate",
+      "commodities": "Commodities",
+      "etfs": "ETFs",
+      "crypto": "Crypto"
+    },
     "decorLine": "Lorem ipsum {{n}}"
   },
   "portfolio": {
