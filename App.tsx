@@ -75,11 +75,20 @@ function SessionLock() {
   const dispatch = useDispatch();
   const hasAuth = useSelector((s: RootState) => !!s.auth.accessToken);
   const pinOk = useSelector((s: RootState) => s.auth.pinConfigured);
+  const appStateRef = useRef(AppState.currentState);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (next) => {
-      if (next === 'background' || next === 'inactive') {
-        if (hasAuth && pinOk) dispatch(setUnlocked(false));
+      const prev = appStateRef.current;
+      appStateRef.current = next;
+
+      if (
+        prev === 'active' &&
+        (next === 'inactive' || next === 'background') &&
+        hasAuth &&
+        pinOk
+      ) {
+        dispatch(setUnlocked(false));
       }
     });
     return () => sub.remove();

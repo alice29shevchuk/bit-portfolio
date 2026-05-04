@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
+  AppState,
   InteractionManager,
   Pressable,
   ScrollView,
@@ -123,11 +124,34 @@ export default function UnlockScreen({ navigation }: Props) {
 
   useEffect(() => {
     if (autoBioAttempted.current) return;
-    autoBioAttempted.current = true;
-    const id = setTimeout(() => {
-      void tryBiometric();
-    }, 450);
-    return () => clearTimeout(id);
+
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const scheduleBio = () => {
+      if (autoBioAttempted.current) return;
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (autoBioAttempted.current) return;
+        autoBioAttempted.current = true;
+        void tryBiometric();
+      }, 450);
+    };
+
+    const scheduleIfActive = () => {
+      if (AppState.currentState !== 'active') return;
+      scheduleBio();
+    };
+
+    const sub = AppState.addEventListener('change', (next) => {
+      if (next === 'active') scheduleIfActive();
+    });
+
+    scheduleIfActive();
+
+    return () => {
+      sub.remove();
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+    };
   }, [tryBiometric]);
 
   return (
