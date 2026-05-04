@@ -1,4 +1,7 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { Image } from 'expo-image';
+import type { ComponentProps } from 'react';
+import type { ImageStyle, StyleProp } from 'react-native';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '@/theme/colors';
@@ -6,18 +9,35 @@ import { colors } from '@/theme/colors';
 type Props = {
   title: string;
   subtitle: string;
+  /** Заменяет стандартную иконку аккаунта (например SVG из assets). */
+  leadingImage?: ComponentProps<typeof Image>['source'];
+  /** Размер контейнера под арт (по умолчанию 49×49). */
+  leadingImageStyle?: StyleProp<ImageStyle>;
 };
 
-export default function AuthFormHeader({ title, subtitle }: Props) {
+export default function AuthFormHeader({
+  title,
+  subtitle,
+  leadingImage,
+  leadingImageStyle,
+}: Props) {
   return (
     <View style={styles.row}>
-      <View style={styles.iconCircle}>
-        <MaterialCommunityIcons
-          name="account-outline"
-          size={26}
-          color={colors.accent}
+      {leadingImage ? (
+        <Image
+          source={leadingImage}
+          style={[styles.leadingImage, leadingImageStyle]}
+          contentFit="contain"
         />
-      </View>
+      ) : (
+        <View style={styles.iconCircle}>
+          <MaterialCommunityIcons
+            name="account-outline"
+            size={26}
+            color={colors.accent}
+          />
+        </View>
+      )}
       <View style={styles.textCol}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.sub}>{subtitle}</Text>
@@ -33,6 +53,7 @@ const styles = StyleSheet.create({
     gap: 14,
     marginBottom: 28,
   },
+  leadingImage: { width: 49, height: 49 },
   iconCircle: {
     width: 48,
     height: 48,
@@ -42,6 +63,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   textCol: { flex: 1 },
-  title: { fontSize: 22, fontWeight: '700', color: colors.text },
-  sub: { fontSize: 14, color: colors.muted, marginTop: 4 },
+  title: { fontSize: 15, fontWeight: '500', color: colors.text },
+  sub: { fontSize: 15, color: colors.muted, marginTop: 4 },
 });

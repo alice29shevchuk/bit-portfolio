@@ -1,13 +1,16 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Image } from 'expo-image';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { useLayoutEffect, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import {
   InteractionManager,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  View,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 
@@ -18,13 +21,24 @@ import type { RootStackParamList } from '@/navigation/types';
 import { savePin } from '@/security/pinStorage';
 import type { AppDispatch } from '@/store/index';
 import { setBiometricsEnabled } from '@/store/settingsSlice';
-import { setPinConfigured } from '@/store/authSlice';
+import { logout, setPinConfigured } from '@/store/authSlice';
 import { setUnlocked } from '@/store/sessionSlice';
 import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
 import { biometricPromptOptions } from '@/utils/biometrics';
 
+const PIN_SETUP_ICON = require('../assets/images/pin-setup-icon.svg');
+
+/** Как на Login — full-bleed сепараторы. */
+const FORM_HORIZONTAL_PADDING = 22;
+
 type Props = NativeStackScreenProps<RootStackParamList, 'CreatePin'>;
+
+/** Ключи i18n: «PINs must match» показываем над верхним сепаратором. */
+type CreatePinErrorKey =
+  | 'validation.pinDigits'
+  | 'validation.pinMatch'
+  | 'pin.saveError';
 
 async function offerSystemBiometricEnrollment(
   t: (key: string) => string,
@@ -42,7 +56,7 @@ async function offerSystemBiometricEnrollment(
     });
 
     dispatch(setBiometricsEnabled(result.success));
-  } catch {}
+  } catch { }
 }
 
 export default function CreatePinScreen({ navigation }: Props) {
@@ -51,31 +65,54 @@ export default function CreatePinScreen({ navigation }: Props) {
   const [step, setStep] = useState<'first' | 'repeat'>('first');
   const [firstPin, setFirstPin] = useState('');
   const [entry, setEntry] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<CreatePinErrorKey | null>(null);
+
+  const handleBack = useCallback(() => {
+    setErrorKey(null);
+    if (step === 'repeat') {
+      setStep('first');
+      setFirstPin('');
+      setEntry('');
+      return;
+    }
+    dispatch(logout());
+  }, [dispatch, step]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title:
-        step === 'first' ? t('pin.createTitleLong') : t('pin.repeatTitleLong'),
-      headerBackVisible: step === 'repeat',
+      headerLeft: () => (
+        <Pressable
+          hitSlop={12}
+          onPress={handleBack}
+          style={styles.headerBackBtn}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+        >
+          <MaterialCommunityIcons
+            name="chevron-left"
+            size={30}
+            color={colors.text}
+          />
+        </Pressable>
+      ),
     });
-  }, [navigation, step, t]);
+  }, [navigation, handleBack]);
 
   const append = (d: string) => {
-    setError(null);
+    setErrorKey(null);
     if (entry.length >= PIN_LENGTH) return;
     setEntry((e) => e + d);
   };
 
   const del = () => {
-    setError(null);
+    setErrorKey(null);
     setEntry((e) => e.slice(0, -1));
   };
 
   const onContinue = async () => {
-    setError(null);
+    setErrorKey(null);
     if (entry.length !== PIN_LENGTH) {
-      setError(t('validation.pinDigits'));
+      setErrorKey('validation.pinDigits');
       return;
     }
     if (step === 'first') {
@@ -85,14 +122,14 @@ export default function CreatePinScreen({ navigation }: Props) {
       return;
     }
     if (entry !== firstPin) {
-      setError(t('validation.pinMatch'));
+      setErrorKey('validation.pinMatch');
       return;
     }
 
     try {
       await savePin(entry);
     } catch {
-      setError(t('pin.saveError'));
+      setErrorKey('pin.saveError');
       return;
     }
 
@@ -108,29 +145,93 @@ export default function CreatePinScreen({ navigation }: Props) {
       style={styles.flex}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.instruction}>{t('pin.enterDigits', { n: PIN_LENGTH })}</Text>
-      <PinDots length={PIN_LENGTH} filled={entry.length} />
-      <PinKeypad onDigit={append} onDelete={del} />
-      {error ? <Text style={styles.err}>{error}</Text> : null}
-      <Pressable style={styles.primaryBtn} onPress={() => void onContinue()}>
-        <Text style={styles.primaryBtnText}>{t('common.continue')}</Text>
-      </Pressable>
+      <View style={styles.topBlock}>
+        <Image
+          source={PIN_SETUP_ICON}
+          style={styles.pinIcon}
+          contentFit="contain"
+        />
+        <Text style={styles.screenTitle}>
+          {step === 'first' ? t('pin.createTitleLong') : t('pin.repeatTitleLong')}
+        </Text>
+        <Text style={styles.instruction}>{t('pin.enterDigits', { n: PIN_LENGTH })}</Text>
+        <PinDots length={PIN_LENGTH} filled={entry.length} />
+      </View>
+
+      <View style={styles.bottomBlock}>
+        {errorKey === 'validation.pinMatch' ? (
+          <Text style={styles.errAboveSeparator}>{t(errorKey)}</Text>
+        ) : null}
+        <View style={[styles.separator, styles.separatorAboveKeypad]} />
+        <PinKeypad onDigit={append} onDelete={del} />
+        {errorKey && errorKey !== 'validation.pinMatch' ? (
+          <Text style={styles.err}>{t(errorKey)}</Text>
+        ) : null}
+        <View style={[styles.separator, styles.separatorAboveContinue]} />
+        <Pressable style={styles.primaryBtn} onPress={() => void onContinue()}>
+          <Text style={styles.primaryBtnText}>{t('common.continue')}</Text>
+        </Pressable>
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
+  headerBackBtn: {
+    marginLeft: 4,
+    paddingVertical: 4,
+  },
   scroll: {
-    paddingHorizontal: 22,
-    paddingTop: 24,
+    flexGrow: 1,
+    paddingHorizontal: FORM_HORIZONTAL_PADDING,
+    paddingTop: 16,
     paddingBottom: 40,
+  },
+  topBlock: {
+    alignItems: 'center',
+  },
+  pinIcon: {
+    width: 49,
+    height: 49,
+    marginBottom: 16,
+  },
+  screenTitle: {
+    textAlign: 'center',
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '500',
+    marginBottom: 52,
+    paddingHorizontal: 8,
   },
   instruction: {
     textAlign: 'center',
     color: colors.muted,
     fontSize: 15,
-    marginBottom: 8,
+  },
+  bottomBlock: {
+    marginTop: 'auto',
+    paddingTop: 8,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: colors.separator,
+    marginHorizontal: -FORM_HORIZONTAL_PADDING,
+  },
+  separatorAboveKeypad: {
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  errAboveSeparator: {
+    color: colors.danger,
+    textAlign: 'center',
+    marginBottom: 12,
+    fontSize: 14,
+    paddingHorizontal: 8,
+  },
+  separatorAboveContinue: {
+    marginTop: 16,
+    marginBottom: 20,
   },
   err: {
     color: colors.danger,
@@ -139,7 +240,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   primaryBtn: {
-    marginTop: 28,
+    marginTop: 0,
     backgroundColor: colors.accent,
     paddingVertical: 17,
     borderRadius: radius.pill,

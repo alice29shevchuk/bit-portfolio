@@ -32,6 +32,8 @@ const CATEGORY_CARD_MIN_HEIGHT = 136;
 const RIGHT_COL_START_FRAC = 0.52;
 
 const WELCOME_BITCOIN_VECTOR = require('../assets/images/welcome-bitcoin-vector.svg');
+/** Тот же арт, что и у шапки auth (`bg.svg`). */
+const WELCOME_FOOTER_BG = require('../assets/images/auth-header-bg.svg');
 
 /** viewBox Vector.svg: 62×82 */
 const VECTOR_ASPECT = 82 / 62;
@@ -126,16 +128,24 @@ export default function WelcomeScreen({ navigation }: Props) {
           </View>
         </View>
 
-        <View style={styles.footer}>
-          <Pressable onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.signIn}>{t('welcome.signIn')}</Text>
-          </Pressable>
-          <Pressable
-            style={styles.primaryBtn}
-            onPress={() => navigation.navigate('Register')}
-          >
-            <Text style={styles.primaryBtnText}>{t('welcome.signUp')}</Text>
-          </Pressable>
+        <View style={styles.footerWrap}>
+          <Image
+            pointerEvents="none"
+            source={WELCOME_FOOTER_BG}
+            style={StyleSheet.absoluteFillObject}
+            contentFit="cover"
+          />
+          <View style={styles.footer}>
+            <Pressable onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.signIn}>{t('welcome.signIn')}</Text>
+            </Pressable>
+            <Pressable
+              style={styles.primaryBtn}
+              onPress={() => navigation.navigate('Register')}
+            >
+              <Text style={styles.primaryBtnText}>{t('welcome.signUp')}</Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -172,7 +182,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  footer: { marginTop: 'auto', paddingTop: 32, gap: 18 },
+  footerWrap: {
+    flexGrow: 1,
+    marginTop: 'auto',
+    marginHorizontal: -SCREEN_PAD,
+    position: 'relative',
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+  },
+  footer: {
+    paddingHorizontal: SCREEN_PAD,
+    paddingTop: 32,
+    gap: 18,
+  },
   signIn: {
     color: colors.accent,
     fontWeight: '600',

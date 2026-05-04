@@ -6,6 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -15,16 +16,33 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 import { z } from 'zod';
 
 import AuthFormHeader from '@/components/AuthFormHeader';
+import AuthSheetChrome from '@/components/AuthSheetChrome';
 import { loginRequest } from '@/api/authService';
 import type { RootStackParamList } from '@/navigation/types';
 import { setCredentials } from '@/store/authSlice';
 import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
+
+const LOGIN_HEADER_ART = require('../assets/images/login-form-header.svg');
+
+/** Совпадает с горизонтальным паддингом формы — для full-bleed сепаратора. */
+const FORM_HORIZONTAL_PADDING = 22;
+
+/** Тонкий красный «i» при ошибке входа (контур, без заливки круга). */
+function FieldErrorHintIcon() {
+  return (
+    <MaterialCommunityIcons
+      name="information-outline"
+      size={18}
+      color={colors.danger}
+      style={styles.fieldErrorIcon}
+    />
+  );
+}
 
 const loginSchema = z.object({
   username: z.string().trim().min(1),
@@ -71,7 +89,7 @@ export default function LoginScreen({ navigation }: Props) {
   });
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <AuthSheetChrome onBack={() => navigation.goBack()}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -80,64 +98,79 @@ export default function LoginScreen({ navigation }: Props) {
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
         >
-          <Pressable
-            hitSlop={12}
-            onPress={() => navigation.goBack()}
-            style={styles.back}
-          >
-            <MaterialCommunityIcons
-              name="chevron-left"
-              size={30}
-              color={colors.text}
-            />
-          </Pressable>
-
           <AuthFormHeader
             title={t('auth.loginTitle')}
             subtitle={t('auth.personalAccount')}
+            leadingImage={LOGIN_HEADER_ART}
           />
 
-          {formError ? <Text style={styles.banner}>{formError}</Text> : null}
+          <View style={styles.separator} />
 
-          <Text style={styles.label}>{t('auth.loginUsernameLabel')}</Text>
+          {formError ? <Text style={styles.formErrorText}>{formError}</Text> : null}
+
+          <Text style={styles.label}>{t('auth.email')}</Text>
           <Controller
             control={control}
             name="username"
             render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={!busy}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                placeholder="emilys"
-                placeholderTextColor={colors.muted}
-                style={styles.input}
-                value={value}
-              />
+              <View
+                style={[styles.inputRow, formError && styles.inputRowBorderError]}
+              >
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={!busy}
+                  onBlur={onBlur}
+                  onChangeText={(text) => {
+                    setFormError(null);
+                    onChange(text);
+                  }}
+                  placeholder="emilys"
+                  placeholderTextColor={colors.muted}
+                  style={[styles.input, styles.inputFlex]}
+                  value={value}
+                />
+                {formError ? <FieldErrorHintIcon /> : null}
+              </View>
             )}
           />
           {errors.username ? (
             <Text style={styles.err}>{errors.username.message}</Text>
           ) : null}
-          <Text style={styles.fieldHelp}>{t('auth.loginUsernameHelp')}</Text>
 
-          <Text style={styles.label}>{t('auth.password')}</Text>
+          <View style={[styles.passwordLabelRow, styles.labelAfterField]}>
+            <Text style={styles.labelFlat}>{t('auth.password')}</Text>
+            <Pressable
+              hitSlop={10}
+              accessibilityRole="button"
+              onPress={() =>
+                Alert.alert(t('auth.forgotPassword'), t('auth.forgotPasswordHint'))
+              }
+            >
+              <Text style={styles.forgotLink}>{t('auth.forgotPassword')}</Text>
+            </Pressable>
+          </View>
           <Controller
             control={control}
             name="password"
             render={({ field: { onChange, onBlur, value } }) => (
-              <View style={styles.inputRow}>
+              <View
+                style={[styles.inputRow, formError && styles.inputRowBorderError]}
+              >
                 <TextInput
                   editable={!busy}
                   onBlur={onBlur}
-                  onChangeText={onChange}
+                  onChangeText={(text) => {
+                    setFormError(null);
+                    onChange(text);
+                  }}
                   placeholder={t('auth.passwordPlaceholder')}
                   placeholderTextColor={colors.muted}
                   secureTextEntry={!showPw}
                   style={[styles.input, styles.inputFlex]}
                   value={value}
                 />
+                {formError ? <FieldErrorHintIcon /> : null}
                 <Pressable
                   onPress={() => setShowPw((s) => !s)}
                   style={styles.eye}
@@ -146,7 +179,7 @@ export default function LoginScreen({ navigation }: Props) {
                   <MaterialCommunityIcons
                     name={showPw ? 'eye-off-outline' : 'eye-outline'}
                     size={22}
-                    color={colors.muted}
+                    color={colors.accent}
                   />
                 </Pressable>
               </View>
@@ -155,8 +188,6 @@ export default function LoginScreen({ navigation }: Props) {
           {errors.password ? (
             <Text style={styles.err}>{errors.password.message}</Text>
           ) : null}
-
-          <Text style={styles.mini}>{t('auth.passwordHintDummy')}</Text>
 
           <Pressable
             disabled={busy}
@@ -179,34 +210,59 @@ export default function LoginScreen({ navigation }: Props) {
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </AuthSheetChrome>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
   flex: { flex: 1 },
   scroll: {
     flexGrow: 1,
-    paddingHorizontal: 22,
+    paddingHorizontal: FORM_HORIZONTAL_PADDING,
+    paddingTop: 8,
     paddingBottom: 40,
   },
-  back: { alignSelf: 'flex-start', paddingVertical: 6, marginBottom: 8 },
-  banner: {
-    backgroundColor: colors.pinkTint,
-    color: colors.danger,
-    padding: 12,
-    borderRadius: radius.sm,
+  separator: {
+    height: 1,
+    backgroundColor: colors.separator,
+    marginHorizontal: -FORM_HORIZONTAL_PADDING,
     marginBottom: 16,
-    overflow: 'hidden',
-    fontSize: 14,
-    fontWeight: '600',
+  },
+  formErrorText: {
+    color: colors.danger,
+    fontSize: 16,
+    fontWeight: '400',
+    marginBottom: 16,
   },
   label: {
-    color: colors.text,
+    color: colors.mutedDark,
     marginBottom: 8,
     fontSize: 15,
     fontWeight: '600',
+  },
+  labelAfterField: {
+    marginTop: 16,
+  },
+  passwordLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 8,
+  },
+  labelFlat: {
+    color: colors.mutedDark,
+    fontSize: 15,
+    fontWeight: '600',
+    flexShrink: 1,
+  },
+  forgotLink: {
+    color: colors.accent,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  fieldErrorIcon: {
+    marginRight: 4,
   },
   input: {
     borderWidth: 1,
@@ -216,8 +272,8 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     fontSize: 16,
     color: colors.text,
-    backgroundColor: colors.cardMuted,
-    marginBottom: 6,
+    backgroundColor: colors.card,
+    marginBottom: 4,
   },
   inputRow: {
     flexDirection: 'row',
@@ -225,27 +281,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.md,
-    backgroundColor: colors.cardMuted,
-    marginBottom: 6,
+    backgroundColor: colors.card,
+    marginBottom: 4,
     paddingRight: 10,
+  },
+  inputRowBorderError: {
+    borderColor: colors.danger,
   },
   inputFlex: { flex: 1, borderWidth: 0, marginBottom: 0, backgroundColor: 'transparent' },
   eye: { padding: 8 },
-  err: { color: colors.danger, marginBottom: 10, fontSize: 13 },
-  fieldHelp: {
-    color: colors.muted,
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 16,
-    marginTop: 2,
-  },
-  mini: { color: colors.muted, fontSize: 13, marginBottom: 22 },
+  err: { color: colors.danger, marginBottom: 8, fontSize: 13 },
   primaryBtn: {
     backgroundColor: colors.accent,
     paddingVertical: 17,
     borderRadius: radius.pill,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 24,
   },
   disabled: { opacity: 0.75 },
   primaryBtnText: {

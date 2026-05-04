@@ -17,10 +17,16 @@ import {
 } from 'react-native';
 
 import AuthFormHeader from '@/components/AuthFormHeader';
+import AuthSheetChrome from '@/components/AuthSheetChrome';
 import type { RootStackParamList } from '@/navigation/types';
 import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
 import { registerSchema, type RegisterFormValues } from '@/utils/validation';
+
+const REGISTER_HEADER_ART = require('../assets/images/register-form-header.svg');
+
+/** Как на Login — для full-bleed сепаратора. */
+const FORM_HORIZONTAL_PADDING = 22;
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
@@ -47,122 +53,141 @@ export default function RegisterScreen({ navigation }: Props) {
   });
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
+    <AuthSheetChrome onBack={() => navigation.goBack()}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <AuthFormHeader
-          title={t('auth.registerTitle')}
-          subtitle={t('auth.personalAccount')}
-        />
-
-        <Text style={styles.label}>{t('auth.name')}</Text>
-        <Controller
-          control={control}
-          name="name"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              onBlur={onBlur}
-              onChangeText={onChange}
-              placeholder={t('auth.name')}
-              placeholderTextColor={colors.muted}
-              style={styles.input}
-              value={value}
+        <View style={styles.flex}>
+          <ScrollView
+            style={styles.scrollFlex}
+            contentContainerStyle={styles.scroll}
+            keyboardShouldPersistTaps="handled"
+          >
+            <AuthFormHeader
+              title={t('auth.registerTitle')}
+              subtitle={t('auth.personalAccount')}
+              leadingImage={REGISTER_HEADER_ART}
+              leadingImageStyle={{ width: 49, height: 53 }}
             />
-          )}
-        />
-        {errors.name ? (
-          <Text style={styles.err}>{t('validation.nameRequired')}</Text>
-        ) : null}
 
-        <Text style={styles.label}>{t('auth.email')}</Text>
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="email-address"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              placeholder="emma-watson@m.com"
-              placeholderTextColor={colors.muted}
-              style={styles.input}
-              value={value}
-            />
-          )}
-        />
-        {errors.email ? (
-          <Text style={styles.err}>{t('validation.emailInvalid')}</Text>
-        ) : null}
+            <View style={styles.separator} />
 
-        <Text style={styles.label}>{t('auth.password')}</Text>
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <View style={styles.inputRow}>
-              <TextInput
-                onBlur={onBlur}
-                onChangeText={onChange}
-                placeholder={t('auth.passwordPlaceholder')}
-                placeholderTextColor={colors.muted}
-                secureTextEntry={!showPw}
-                style={[styles.input, styles.inputFlex]}
-                value={value}
-              />
-              <Pressable
-                onPress={() => setShowPw((s) => !s)}
-                style={styles.eye}
-              >
-                <MaterialCommunityIcons
-                  name={showPw ? 'eye-off-outline' : 'eye-outline'}
-                  size={22}
-                  color={colors.muted}
+            <Text style={styles.label}>{t('auth.name')}</Text>
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder="Emma Watson"
+                  placeholderTextColor={colors.muted}
+                  style={styles.input}
+                  value={value}
                 />
-              </Pressable>
-            </View>
-          )}
-        />
-        {errors.password ? (
-          <Text style={styles.err}>{t('validation.passwordRules')}</Text>
-        ) : (
-          <Text style={styles.hint}>{t('validation.passwordRules')}</Text>
-        )}
+              )}
+            />
+            {errors.name ? (
+              <Text style={styles.err}>{t('validation.nameRequired')}</Text>
+            ) : null}
 
-        <Pressable onPress={onSubmit} style={styles.primaryBtn}>
-          <Text style={styles.primaryBtnText}>{t('common.continue')}</Text>
-        </Pressable>
+            <Text style={[styles.label, styles.labelAfterField]}>{t('auth.email')}</Text>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="email-address"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder="emma-watson@m.com"
+                  placeholderTextColor={colors.muted}
+                  style={styles.input}
+                  value={value}
+                />
+              )}
+            />
+            {errors.email ? (
+              <Text style={styles.err}>{t('validation.emailInvalid')}</Text>
+            ) : null}
 
-        <Pressable
-          onPress={() => navigation.navigate('Login')}
-          style={styles.secondaryBtn}
-        >
-          <Text style={styles.secondaryBtnText}>{t('auth.goLogin')}</Text>
-        </Pressable>
-      </ScrollView>
-    </KeyboardAvoidingView>
+            <Text style={[styles.label, styles.labelAfterField]}>{t('auth.password')}</Text>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View style={styles.inputRow}>
+                  <TextInput
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    placeholder={t('auth.passwordPlaceholder')}
+                    placeholderTextColor={colors.muted}
+                    secureTextEntry={!showPw}
+                    style={[styles.input, styles.inputFlex]}
+                    value={value}
+                  />
+                  <Pressable
+                    onPress={() => setShowPw((s) => !s)}
+                    style={styles.eye}
+                  >
+                    <MaterialCommunityIcons
+                      name={showPw ? 'eye-off-outline' : 'eye-outline'}
+                      size={22}
+                      color={colors.muted}
+                    />
+                  </Pressable>
+                </View>
+              )}
+            />
+            {errors.password ? (
+              <Text style={styles.err}>{t('validation.passwordRules')}</Text>
+            ) : (
+              <Text style={styles.hint}>{t('validation.passwordRules')}</Text>
+            )}
+          </ScrollView>
+
+          <View style={styles.bottomBar}>
+            <Pressable onPress={onSubmit} style={styles.primaryBtn}>
+              <Text style={styles.primaryBtnText}>{t('common.continue')}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </AuthSheetChrome>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.bg },
+  flex: { flex: 1 },
+  scrollFlex: { flex: 1 },
   scroll: {
     flexGrow: 1,
-    paddingHorizontal: 22,
+    paddingHorizontal: FORM_HORIZONTAL_PADDING,
     paddingTop: 12,
-    paddingBottom: 48,
+    paddingBottom: 24,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: colors.separator,
+    marginHorizontal: -FORM_HORIZONTAL_PADDING,
+    marginBottom: 20,
   },
   label: {
-    color: colors.text,
+    color: colors.mutedDark,
     marginBottom: 8,
     fontSize: 15,
     fontWeight: '600',
+  },
+  labelAfterField: {
+    marginTop: 16,
+  },
+  bottomBar: {
+    paddingHorizontal: FORM_HORIZONTAL_PADDING,
+    paddingTop: 8,
+    paddingBottom: 12,
   },
   input: {
     borderWidth: 1,
@@ -172,8 +197,8 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     fontSize: 16,
     color: colors.text,
-    backgroundColor: colors.cardMuted,
-    marginBottom: 6,
+    backgroundColor: colors.card,
+    marginBottom: 10,
   },
   inputRow: {
     flexDirection: 'row',
@@ -181,34 +206,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.md,
-    backgroundColor: colors.cardMuted,
-    marginBottom: 6,
+    backgroundColor: colors.card,
+    marginBottom: 10,
     paddingRight: 10,
   },
   inputFlex: { flex: 1, borderWidth: 0, marginBottom: 0, backgroundColor: 'transparent' },
   eye: { padding: 8 },
-  err: { color: colors.danger, marginBottom: 12, fontSize: 13 },
-  hint: { color: colors.muted, marginBottom: 18, fontSize: 13 },
+  err: { color: colors.danger, marginBottom: 10, fontSize: 13 },
+  hint: { color: colors.muted, marginBottom: 4, fontSize: 13 },
   primaryBtn: {
     backgroundColor: colors.accent,
     paddingVertical: 17,
     borderRadius: radius.pill,
     alignItems: 'center',
-    marginTop: 16,
   },
   primaryBtnText: {
     color: colors.onAccent,
     fontWeight: '700',
     fontSize: 17,
-  },
-  secondaryBtn: {
-    marginTop: 16,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  secondaryBtnText: {
-    color: colors.accent,
-    fontWeight: '600',
-    fontSize: 15,
   },
 });

@@ -21,13 +21,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 14,
-    marginVertical: 28,
+    gap: 16,
+    marginVertical: 26,
   },
   dot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    width: 17,
+    height: 17,
+    borderRadius: 8.5,
     borderWidth: 1.5,
     borderColor: colors.border,
     backgroundColor: colors.bg,

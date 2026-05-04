@@ -40,17 +40,7 @@ export default function RootNavigator({ token, pinConfigured, unlocked }: Props)
           <Stack.Screen name="Splash" component={SplashScreen} />
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen
-            name="Register"
-            component={RegisterScreen}
-            options={{
-              headerShown: true,
-              headerTitle: '',
-              headerTintColor: colors.text,
-              headerStyle: { backgroundColor: colors.bg },
-              headerShadowVisible: false,
-            }}
-          />
+          <Stack.Screen name="Register" component={RegisterScreen} />
         </>
       ) : !pinConfigured ? (
         <Stack.Screen
@@ -61,6 +51,8 @@ export default function RootNavigator({ token, pinConfigured, unlocked }: Props)
             headerTintColor: colors.text,
             headerStyle: { backgroundColor: colors.bg },
             headerShadowVisible: false,
+            title: '',
+            headerBackVisible: false,
           }}
         />
       ) : !unlocked ? (
