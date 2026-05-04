@@ -1,5 +1,6 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -11,78 +12,87 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { usePostDetail } from '@/hooks/usePostsQueries';
+import { usePostComments, usePostDetail } from '@/hooks/usePostsQueries';
 import type { MainAppStackParamList } from '@/navigation/types';
 import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
 
+const POST_DETAIL_HERO = require('../assets/images/post-detail-hero.png');
+
 type Props = NativeStackScreenProps<MainAppStackParamList, 'PostDetail'>;
 
-const MOCK_COMMENTS = [
-  {
-    key: '1',
-    name: 'Igor',
-    email: 'igor@example.com',
-    bodyKey: 'post.mockComment1',
-  },
-  {
-    key: '2',
-    name: 'Anna',
-    email: 'anna@example.com',
-    bodyKey: 'post.mockComment2',
-  },
-  {
-    key: '3',
-    name: 'Chris',
-    email: 'chris@example.com',
-    bodyKey: 'post.mockComment3',
-  },
-] as const;
+function capitalizeFirstLetter(text: string): string {
+  const s = text.trim();
+  if (!s) return s;
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 export default function PostDetailScreen({ navigation, route }: Props) {
   const { t } = useTranslation();
   const postId = route.params.postId;
   const { data, isPending, isError } = usePostDetail(postId);
+  const {
+    data: comments,
+    isPending: commentsPending,
+    isError: commentsError,
+  } = usePostComments(postId);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <View style={styles.topBar}>
-        <Pressable hitSlop={12} onPress={() => navigation.goBack()} style={styles.backHit}>
-          <MaterialCommunityIcons name="chevron-left" size={28} color={colors.text} />
-        </Pressable>
-        <Text style={styles.topTitle} numberOfLines={1}>
-          {data?.title ?? t('post.title')}
-        </Text>
-        <View style={{ width: 28 }} />
+    <View style={styles.root}>
+      <View style={styles.whiteHero}>
+        <SafeAreaView edges={['top']} style={styles.whiteHeroSafe}>
+          <View style={styles.header}>
+            <Pressable hitSlop={12} onPress={() => navigation.goBack()} style={styles.backHit}>
+              <MaterialCommunityIcons name="chevron-left" size={28} color={colors.text} />
+            </Pressable>
+          </View>
+
+          {data ? (
+            <>
+              <Text style={styles.postTitleText} numberOfLines={5}>
+                {capitalizeFirstLetter(data.title)}
+              </Text>
+              <Image
+                source={POST_DETAIL_HERO}
+                style={styles.heroImage}
+                contentFit="contain"
+                accessibilityIgnoresInvertColors
+              />
+            </>
+          ) : isPending ? (
+            <ActivityIndicator color={colors.accent} style={styles.heroSpinner} />
+          ) : null}
+        </SafeAreaView>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll} style={styles.flex}>
-        {isPending ? (
-          <ActivityIndicator color={colors.accent} style={{ marginTop: 32 }} />
-        ) : null}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollInner}
+        showsVerticalScrollIndicator={false}
+      >
         {isError ? (
           <Text style={styles.err}>{t('post.errorLoad')}</Text>
         ) : null}
 
         {data ? (
           <>
-            <View style={styles.heroImg}>
-              <MaterialCommunityIcons
-                name="book-open-variant"
-                size={72}
-                color={colors.accent}
-              />
+            <Text style={styles.aboutHeading}>{t('post.about')}</Text>
+            <View style={styles.aboutCard}>
+              <Text style={styles.body}>{capitalizeFirstLetter(data.body)}</Text>
             </View>
 
-            <Text style={styles.aboutHeading}>{t('post.about')}</Text>
-            <Text style={styles.body}>{data.body}</Text>
-
             <Text style={styles.commentsHeading}>{t('post.comments')}</Text>
-            {MOCK_COMMENTS.map((c) => (
-              <View key={c.key} style={styles.commentCard}>
-                <Text style={styles.cName}>{c.name}</Text>
+            {commentsPending ? (
+              <ActivityIndicator color={colors.accent} style={styles.commentsSpinner} />
+            ) : null}
+            {commentsError ? (
+              <Text style={styles.err}>{t('post.commentsLoadError')}</Text>
+            ) : null}
+            {(comments ?? []).map((c) => (
+              <View key={c.id} style={styles.commentCard}>
+                <Text style={styles.cName}>{capitalizeFirstLetter(c.name)}</Text>
                 <Text style={styles.cEmail}>{c.email}</Text>
-                <Text style={styles.cBody}>{t(c.bodyKey)}</Text>
+                <Text style={styles.cBody}>{capitalizeFirstLetter(c.body)}</Text>
               </View>
             ))}
           </>
@@ -92,59 +102,98 @@ export default function PostDetailScreen({ navigation, route }: Props) {
           <Text style={styles.footerBtnText}>{t('common.back')}</Text>
         </Pressable>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  flex: { flex: 1 },
-  topBar: {
+  root: {
+    flex: 1,
+    backgroundColor: colors.surfaceGray,
+  },
+  whiteHero: {
+    backgroundColor: colors.card,
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
+    overflow: 'hidden',
+  },
+  whiteHeroSafe: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
     paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    marginHorizontal: -8,
   },
   backHit: { padding: 4 },
-  topTitle: {
+  scroll: {
     flex: 1,
-    textAlign: 'center',
-    fontSize: 17,
-    fontWeight: '700',
-    color: colors.text,
+    marginTop: -12,
+    backgroundColor: 'transparent',
   },
-  scroll: { paddingHorizontal: 20, paddingBottom: 40 },
-  heroImg: {
-    marginTop: 20,
-    marginBottom: 24,
-    height: 200,
+  scrollInner: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 20,
+  },
+  heroSpinner: {
+    marginTop: 32,
+    marginBottom: 16,
+  },
+  postTitleText: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: colors.text,
+    lineHeight: 28,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  heroImage: {
+    width: '100%',
+    height: 240,
     borderRadius: radius.lg,
-    backgroundColor: colors.cardMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   aboutHeading: {
     fontSize: 18,
     fontWeight: '800',
     color: colors.text,
-    marginBottom: 10,
+    marginBottom: 12,
+  },
+  aboutCard: {
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    padding: 18,
+    marginBottom: 24,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: colors.card,
   },
   body: { fontSize: 16, lineHeight: 24, color: colors.mutedDark },
   commentsHeading: {
-    marginTop: 28,
     marginBottom: 12,
     fontSize: 18,
     fontWeight: '800',
     color: colors.text,
   },
+  commentsSpinner: { marginVertical: 16 },
   commentCard: {
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    padding: 18,
+    marginBottom: 12,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: colors.card,
   },
   cName: { fontWeight: '700', fontSize: 16, color: colors.text },
   cEmail: { fontSize: 12, color: colors.muted, marginTop: 2 },

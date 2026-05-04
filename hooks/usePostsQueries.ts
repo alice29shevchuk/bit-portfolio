@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { fetchPostById, fetchPosts } from '@/api/postsApi';
+import { fetchCommentsByPostId, fetchPostById, fetchPosts } from '@/api/postsApi';
 
 export function useHomePosts() {
   return useQuery({
@@ -21,5 +21,13 @@ export function usePostDetail(id: number) {
     queryKey: ['posts', 'detail', id],
     queryFn: () => fetchPostById(id),
     enabled: Number.isFinite(id) && id > 0,
+  });
+}
+
+export function usePostComments(postId: number) {
+  return useQuery({
+    queryKey: ['posts', 'comments', postId],
+    queryFn: () => fetchCommentsByPostId(postId),
+    enabled: Number.isFinite(postId) && postId > 0,
   });
 }

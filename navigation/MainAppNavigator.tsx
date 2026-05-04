@@ -95,7 +95,7 @@ export default function MainAppNavigator() {
         component={PostDetailScreen}
         options={{
           headerShown: false,
-          contentStyle: { backgroundColor: colors.bg },
+          contentStyle: { backgroundColor: colors.surfaceGray },
         }}
       />
     </Stack.Navigator>

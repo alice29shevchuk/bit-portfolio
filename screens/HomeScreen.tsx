@@ -2,6 +2,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import {
@@ -24,6 +25,16 @@ import type { RootState } from '@/store/index';
 import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
 import { resolveDisplayName } from '@/utils/displayName';
+
+const TASK_CARD_ART = require('../assets/images/home-test-task.png');
+const BEFORE_CARD_LINK_ICON = require('../assets/images/before-card-link-icon.svg');
+const HOME_SCREEN_BG = '#F2F3F5';
+
+function capitalizeFirstLetter(text: string): string {
+  const s = text.trim();
+  if (!s) return s;
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'HomeTab'>,
@@ -61,57 +72,85 @@ export default function HomeScreen({ navigation }: Props) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.taskCard}>
-          <Text style={styles.taskTitle}>{t('home.testTask')}</Text>
-          <Text style={styles.taskSub}>{t('home.testTaskBody')}</Text>
-          <Pressable style={styles.taskLink}>
-            <Text style={styles.taskLinkText}>{t('home.goToCall')}</Text>
-            <MaterialCommunityIcons
-              name="chevron-right"
-              size={20}
-              color={colors.accent}
+          <View style={styles.taskCardRow}>
+            <View style={styles.taskCardBody}>
+              <Text style={styles.taskTitle}>{t('home.testTask')}</Text>
+              <Text style={styles.taskSub}>{t('home.testTaskBody')}</Text>
+              <Pressable style={styles.taskLink}>
+                <Text style={styles.taskLinkText}>{t('home.goToCall')}</Text>
+                <MaterialCommunityIcons
+                  name="chevron-right"
+                  size={20}
+                  color={colors.accent}
+                />
+              </Pressable>
+            </View>
+            <Image
+              source={TASK_CARD_ART}
+              style={styles.taskCardImage}
+              contentFit="contain"
+              accessibilityIgnoresInvertColors
             />
-          </Pressable>
+          </View>
         </View>
 
         <Text style={styles.section}>{t('home.beforeStart')}</Text>
-        <View style={styles.beforeRow}>
+        <ScrollView
+          horizontal
+          nestedScrollEnabled
+          showsHorizontalScrollIndicator={false}
+          style={styles.beforeRowOuter}
+          contentContainerStyle={styles.beforeRow}
+        >
           <View style={[styles.beforeCard, styles.beforeDark]}>
-            <MaterialCommunityIcons
-              name="link-variant"
-              size={22}
-              color={colors.accent}
-            />
-            <Text style={styles.beforeTitle}>{t('home.linkBank')}</Text>
-            <Text style={styles.beforeMeta}>{t('home.steps', { n: 2 })}</Text>
-            <MaterialCommunityIcons
-              name="chevron-right"
-              size={22}
-              color={colors.onAccent}
-              style={styles.beforeChevron}
-            />
+            <View style={styles.beforeCardTop}>
+              <Image
+                source={BEFORE_CARD_LINK_ICON}
+                style={styles.beforeCardIconImg}
+                contentFit="contain"
+              />
+              <Text style={styles.beforeTitle} numberOfLines={3}>
+                {t('home.linkBank')}
+              </Text>
+            </View>
+            <View style={styles.beforeCardBottom}>
+              <Text style={styles.beforeMeta}>{t('home.steps', { n: 2 })}</Text>
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={22}
+                color={colors.onAccent}
+              />
+            </View>
           </View>
           <View style={[styles.beforeCard, styles.beforePink]}>
-            <MaterialCommunityIcons
-              name="wallet-outline"
-              size={22}
-              color={colors.danger}
-            />
-            <Text style={[styles.beforeTitle, { color: colors.text }]}>
-              {t('home.addWallet')}
-            </Text>
-            <Text style={styles.beforeMetaDark}>{t('home.steps', { n: 3 })}</Text>
-            <MaterialCommunityIcons
-              name="chevron-right"
-              size={22}
-              color={colors.muted}
-              style={styles.beforeChevron}
-            />
+            <View style={styles.beforeCardTop}>
+              <Image
+                source={BEFORE_CARD_LINK_ICON}
+                style={styles.beforeCardIconImg}
+                contentFit="contain"
+              />
+              <Text style={[styles.beforeTitle, styles.beforeTitlePink]} numberOfLines={3}>
+                {t('home.addWallet')}
+              </Text>
+            </View>
+            <View style={styles.beforeCardBottom}>
+              <Text style={styles.beforeMetaDark}>{t('home.steps', { n: 3 })}</Text>
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={22}
+                color={colors.muted}
+              />
+            </View>
           </View>
-        </View>
+        </ScrollView>
 
         <View style={styles.postsHeader}>
-          <Text style={styles.section}>{t('home.posts')}</Text>
-          <Pressable onPress={() => navigation.navigate('SearchTab')}>
+          <Text style={styles.postsTitle}>{t('home.posts')}</Text>
+          <Pressable
+            onPress={() => navigation.navigate('SearchTab')}
+            hitSlop={8}
+            style={styles.seeAllHit}
+          >
             <Text style={styles.seeAll}>{t('home.seeAll')}</Text>
           </Pressable>
         </View>
@@ -123,21 +162,18 @@ export default function HomeScreen({ navigation }: Props) {
           <Text style={styles.err}>{t('post.errorLoad')}</Text>
         ) : null}
 
-        <View style={styles.postList}>
-          {(data ?? []).map((post, idx, arr) => (
+        <View style={styles.postCards}>
+          {(data ?? []).map((post) => (
             <Pressable
               key={post.id}
               onPress={() => openPost(post.id)}
-              style={[
-                styles.postRow,
-                idx < arr.length - 1 && styles.postRowBorder,
-              ]}
+              style={styles.postCard}
             >
-              <Text style={styles.postTitle} numberOfLines={2}>
-                {post.title}
+              <Text style={styles.postCardTitle} numberOfLines={3}>
+                {capitalizeFirstLetter(post.title)}
               </Text>
-              <Text style={styles.postBody} numberOfLines={3}>
-                {post.body}
+              <Text style={styles.postCardBody} numberOfLines={8}>
+                {capitalizeFirstLetter(post.body)}
               </Text>
             </Pressable>
           ))}
@@ -148,27 +184,38 @@ export default function HomeScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  root: { flex: 1, backgroundColor: HOME_SCREEN_BG },
   hero: {
     borderBottomLeftRadius: 36,
     borderBottomRightRadius: 36,
-    paddingBottom: 28,
+    height: 250,
     overflow: 'hidden',
   },
-  heroSafe: { paddingHorizontal: 22 },
+  heroSafe: {
+    flex: 1,
+    paddingHorizontal: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   heroSmall: {
     color: colors.onAccent,
     opacity: 0.95,
     fontSize: 15,
     fontWeight: '600',
+    textAlign: 'center',
   },
   heroName: {
     color: colors.onAccent,
     fontSize: 28,
     fontWeight: '800',
     marginTop: 6,
+    textAlign: 'center',
   },
-  scroll: { flex: 1, marginTop: -12 },
+  scroll: {
+    flex: 1,
+    marginTop: -12,
+    backgroundColor: 'transparent',
+  },
   scrollInner: {
     paddingHorizontal: 20,
     paddingBottom: 100,
@@ -184,8 +231,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 12,
     elevation: 4,
-    borderWidth: 1,
-    borderColor: colors.border,
+  },
+  taskCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  taskCardBody: {
+    flex: 1,
+    minWidth: 0,
+  },
+  taskCardImage: {
+    width: 80,
+    height: 80,
+    flexShrink: 0,
   },
   taskTitle: { fontSize: 17, fontWeight: '700', color: colors.text },
   taskSub: { marginTop: 8, color: colors.muted, fontSize: 14, lineHeight: 20 },
@@ -201,55 +260,103 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   section: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: colors.text,
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.muted,
     marginBottom: 12,
   },
-  beforeRow: { flexDirection: 'row', gap: 12, marginBottom: 22 },
+  beforeRowOuter: { marginBottom: 22 },
+  beforeRow: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingRight: 4,
+  },
   beforeCard: {
-    flex: 1,
+    width: 230,
+    height: 130,
     borderRadius: radius.md,
     padding: 14,
-    minHeight: 110,
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
   },
   beforeDark: { backgroundColor: colors.mutedDark },
   beforePink: { backgroundColor: colors.pinkTint },
+  beforeCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  beforeCardIconImg: {
+    width: 48,
+    height: 48,
+    flexShrink: 0,
+  },
+  beforeCardBottom: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   beforeTitle: {
+    flex: 1,
     color: colors.onAccent,
     fontWeight: '700',
     fontSize: 14,
-    marginTop: 10,
+    lineHeight: 18,
   },
-  beforeMeta: { color: colors.onAccent, opacity: 0.85, marginTop: 6, fontSize: 12 },
-  beforeMetaDark: { color: colors.muted, marginTop: 6, fontSize: 12 },
-  beforeChevron: { position: 'absolute', right: 10, bottom: 10 },
+  beforeTitlePink: {
+    color: colors.text,
+  },
+  beforeMeta: {
+    color: colors.onAccent,
+    opacity: 0.85,
+    fontSize: 12,
+    flexShrink: 1,
+  },
+  beforeMetaDark: { color: colors.muted, fontSize: 12, flexShrink: 1 },
   postsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 12,
   },
-  seeAll: { color: colors.accent, fontWeight: '700', fontSize: 14 },
-  postList: {
+  postsTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: colors.text,
+    lineHeight: 22,
+  },
+  seeAllHit: { justifyContent: 'center' },
+  seeAll: {
+    color: colors.accent,
+    fontWeight: '700',
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  postCards: {
+    gap: 12,
+  },
+  postCard: {
     backgroundColor: colors.card,
     borderRadius: radius.md,
+    padding: 16,
     borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
+    borderColor: colors.card,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  postRow: { paddingVertical: 14, paddingHorizontal: 16 },
-  postRowBorder: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  postTitle: {
+  postCardTitle: {
     fontWeight: '700',
     fontSize: 16,
     color: colors.text,
-    marginBottom: 8,
+    marginBottom: 10,
+    lineHeight: 22,
   },
-  postBody: { color: colors.muted, fontSize: 14, lineHeight: 20 },
+  postCardBody: {
+    color: colors.muted,
+    fontSize: 14,
+    lineHeight: 20,
+  },
   err: { color: colors.danger, marginVertical: 8 },
 });

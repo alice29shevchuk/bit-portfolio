@@ -9,6 +9,24 @@ export type JsonPlaceholderPost = {
   body: string;
 };
 
+export type JsonPlaceholderComment = {
+  postId: number;
+  id: number;
+  name: string;
+  email: string;
+  body: string;
+};
+
+export async function fetchCommentsByPostId(
+  postId: number,
+): Promise<JsonPlaceholderComment[]> {
+  const { data } = await axios.get<JsonPlaceholderComment[]>(
+    `${postsBase}/comments`,
+    { params: { postId } },
+  );
+  return data;
+}
+
 export async function fetchPosts(
   limit?: number,
 ): Promise<JsonPlaceholderPost[]> {

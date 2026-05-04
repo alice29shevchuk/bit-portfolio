@@ -98,6 +98,7 @@
   "home": {
     "greeting": "مرحبًا، {{name}}",
     "welcomeLine": "مرحبًا",
+    "yourNameLabel": "اسمك",
     "personalAdvisor": "مستشار شخصي",
     "personalAdvisorBody": "يساعدك المختص على متابعة خطتك المخصصة.",
     "beforeStart": "قبل أن تبدأ",
@@ -105,7 +106,7 @@
     "posts": "منشورات",
     "seeAll": "عرض الكل",
     "testTask": "مهمة تجريبية",
-    "testTaskBody": "نص تجريبي لوصف المهمة.",
+    "testTaskBody": "Lorem ipsum",
     "goToCall": "انتقل إلى المكالمة",
     "linkBank": "اربط حسابك البنكي",
     "addWallet": "أضف محفظتك",
@@ -119,11 +120,9 @@
     "title": "منشور",
     "authorId": "معرف المستخدم",
     "errorLoad": "تعذر تحميل المنشور.",
+    "commentsLoadError": "تعذر تحميل التعليقات.",
     "about": "عن المنشور",
-    "comments": "التعليقات",
-    "mockComment1": "مقال رائع ومفيد!",
-    "mockComment2": "شكرًا للمشاركة — احتفظت به.",
-    "mockComment3": "هل يمكن إضافة المزيد من التفاصيل؟"
+    "comments": "التعليقات"
   },
   "settings": {
     "title": "الإعدادات",

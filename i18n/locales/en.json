@@ -98,6 +98,7 @@
   "home": {
     "greeting": "Hello, {{name}}",
     "welcomeLine": "Hi, welcome",
+    "yourNameLabel": "Your name",
     "personalAdvisor": "Personal Advisor",
     "personalAdvisorBody": "Your dedicated specialist helps you stay on track with tailored guidance.",
     "beforeStart": "Before you Start",
@@ -105,7 +106,7 @@
     "posts": "Posts",
     "seeAll": "See all",
     "testTask": "Test task",
-    "testTaskBody": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    "testTaskBody": "Lorem ipsum",
     "goToCall": "Go to call",
     "linkBank": "Link your bank account",
     "addWallet": "Add your wallet",
@@ -119,11 +120,9 @@
     "title": "Post",
     "authorId": "Author user ID",
     "errorLoad": "Could not load post.",
+    "commentsLoadError": "Could not load comments.",
     "about": "About",
-    "comments": "Comments",
-    "mockComment1": "Great article, very helpful overview!",
-    "mockComment2": "Thanks for sharing — saved this for later.",
-    "mockComment3": "Could you add more detail on the second part?"
+    "comments": "Comments"
   },
   "settings": {
     "title": "Settings",
