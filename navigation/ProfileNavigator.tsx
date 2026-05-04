@@ -34,7 +34,10 @@ export default function ProfileNavigator() {
       <Stack.Screen
         name="Language"
         component={LanguageScreen}
-        options={{ title: t('settings.language') }}
+        options={{
+          title: t('settings.language'),
+          headerBackButtonDisplayMode: 'minimal',
+        }}
       />
     </Stack.Navigator>
   );
