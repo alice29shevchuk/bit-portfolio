@@ -135,12 +135,16 @@ export default function App() {
               }}
             >
               <AuthBootstrap>
-                <LocaleBridge />
-                <NavigationContainer theme={navTheme}>
-                  <StatusBar style="dark" />
-                  <NavigationRoot />
-                </NavigationContainer>
-                <AppPrivacyShield />
+                <View style={{ flex: 1 }}>
+                  <LocaleBridge />
+                  <View style={{ flex: 1 }}>
+                    <NavigationContainer theme={navTheme}>
+                      <StatusBar style="dark" />
+                      <NavigationRoot />
+                    </NavigationContainer>
+                  </View>
+                  <AppPrivacyShield />
+                </View>
               </AuthBootstrap>
             </PersistQueryClientProvider>
           </PersistGate>

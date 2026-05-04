@@ -146,15 +146,6 @@ export default function UnlockScreen({ navigation }: Props) {
       <Pressable style={styles.primaryBtn} onPress={() => void submitPin()}>
         <Text style={styles.primaryBtnText}>{t('common.continue')}</Text>
       </Pressable>
-      <Pressable
-        onPress={() => void tryBiometric()}
-        style={styles.secondaryBtn}
-        hitSlop={14}
-        accessibilityRole="button"
-        accessibilityLabel={t('biometric.use')}
-      >
-        <Text style={styles.secondaryBtnText}>{t('biometric.use')}</Text>
-      </Pressable>
     </ScrollView>
   );
 }
@@ -198,15 +189,5 @@ const styles = StyleSheet.create({
     color: colors.onAccent,
     fontWeight: '700',
     fontSize: 17,
-  },
-  secondaryBtn: {
-    marginTop: 16,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  secondaryBtnText: {
-    color: colors.accent,
-    fontWeight: '600',
-    fontSize: 15,
   },
 });

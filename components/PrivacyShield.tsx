@@ -1,4 +1,4 @@
-import { Modal, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import BitcoinMark from '@/components/BitcoinMark';
 
@@ -7,30 +7,32 @@ type Props = {
 };
 
 export default function PrivacyShield({ visible }: Props) {
+  if (!visible) return null;
+
   return (
-    <Modal
-      visible={visible}
-      animationType="none"
-      transparent={false}
-      statusBarTranslucent
+    <View
+      style={styles.overlay}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      pointerEvents="auto"
     >
-      <View style={styles.fill} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-        <View style={styles.tilt}>
-          <BitcoinMark size={132} />
-        </View>
+      <View style={styles.fill}>
+        <BitcoinMark width={148} height={126} />
       </View>
-    </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 99999,
+    elevation: 99999,
+  },
   fill: {
     flex: 1,
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  tilt: {
-    transform: [{ rotate: '-10deg' }],
   },
 });
