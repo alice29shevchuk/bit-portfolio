@@ -1,6 +1,7 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -17,7 +18,10 @@ import type { MainAppStackParamList } from '@/navigation/types';
 import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
 
+const SCROLL_TOP_FALLBACK = 540;
+
 const POST_DETAIL_HERO = require('../assets/images/post-detail-hero.png');
+const CONTENT_GAP_BELOW_HERO = 24;
 
 type Props = NativeStackScreenProps<MainAppStackParamList, 'PostDetail'>;
 
@@ -30,6 +34,7 @@ function capitalizeFirstLetter(text: string): string {
 export default function PostDetailScreen({ navigation, route }: Props) {
   const { t } = useTranslation();
   const postId = route.params.postId;
+  const [heroHeight, setHeroHeight] = useState(0);
   const { data, isPending, isError } = usePostDetail(postId);
   const {
     data: comments,
@@ -37,37 +42,17 @@ export default function PostDetailScreen({ navigation, route }: Props) {
     isError: commentsError,
   } = usePostComments(postId);
 
+  const scrollPaddingTop =
+    heroHeight > 0 ? heroHeight + CONTENT_GAP_BELOW_HERO : SCROLL_TOP_FALLBACK;
+
   return (
     <View style={styles.root}>
-      <View style={styles.whiteHero}>
-        <SafeAreaView edges={['top']} style={styles.whiteHeroSafe}>
-          <View style={styles.header}>
-            <Pressable hitSlop={12} onPress={() => navigation.goBack()} style={styles.backHit}>
-              <MaterialCommunityIcons name="chevron-left" size={28} color={colors.text} />
-            </Pressable>
-          </View>
-
-          {data ? (
-            <>
-              <Text style={styles.postTitleText} numberOfLines={5}>
-                {capitalizeFirstLetter(data.title)}
-              </Text>
-              <Image
-                source={POST_DETAIL_HERO}
-                style={styles.heroImage}
-                contentFit="contain"
-                accessibilityIgnoresInvertColors
-              />
-            </>
-          ) : isPending ? (
-            <ActivityIndicator color={colors.accent} style={styles.heroSpinner} />
-          ) : null}
-        </SafeAreaView>
-      </View>
-
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollInner}
+        contentContainerStyle={[
+          styles.scrollInner,
+          { paddingTop: scrollPaddingTop },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {isError ? (
@@ -102,6 +87,41 @@ export default function PostDetailScreen({ navigation, route }: Props) {
           <Text style={styles.footerBtnText}>{t('common.back')}</Text>
         </Pressable>
       </ScrollView>
+
+      <View style={styles.heroOverlay} pointerEvents="box-none">
+        <View
+          style={styles.whiteHero}
+          pointerEvents="box-none"
+          collapsable={false}
+          onLayout={(e) => setHeroHeight(e.nativeEvent.layout.height)}
+        >
+          <SafeAreaView edges={['top']} style={styles.whiteHeroSafe} pointerEvents="box-none">
+            <View style={styles.header} pointerEvents="auto">
+              <Pressable hitSlop={12} onPress={() => navigation.goBack()} style={styles.backHit}>
+                <MaterialCommunityIcons name="chevron-left" size={28} color={colors.text} />
+              </Pressable>
+            </View>
+
+            {data ? (
+              <View pointerEvents="none">
+                <Text style={styles.postTitleText} numberOfLines={5}>
+                  {capitalizeFirstLetter(data.title)}
+                </Text>
+                <Image
+                  source={POST_DETAIL_HERO}
+                  style={styles.heroImage}
+                  contentFit="contain"
+                  accessibilityIgnoresInvertColors
+                />
+              </View>
+            ) : isPending ? (
+              <View pointerEvents="none" style={styles.heroSpinnerWrap}>
+                <ActivityIndicator color={colors.accent} style={styles.heroSpinner} />
+              </View>
+            ) : null}
+          </SafeAreaView>
+        </View>
+      </View>
     </View>
   );
 }
@@ -111,11 +131,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.surfaceGray,
   },
+  heroOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 2,
+    elevation: 8,
+  },
   whiteHero: {
     backgroundColor: colors.card,
     borderBottomLeftRadius: 36,
     borderBottomRightRadius: 36,
     overflow: 'hidden',
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
   },
   whiteHeroSafe: {
     paddingHorizontal: 20,
@@ -130,17 +162,18 @@ const styles = StyleSheet.create({
   backHit: { padding: 4 },
   scroll: {
     flex: 1,
-    marginTop: -12,
-    backgroundColor: 'transparent',
+    backgroundColor: colors.surfaceGray,
   },
   scrollInner: {
     paddingHorizontal: 20,
     paddingBottom: 40,
-    paddingTop: 20,
   },
   heroSpinner: {
     marginTop: 32,
     marginBottom: 16,
+  },
+  heroSpinnerWrap: {
+    alignItems: 'center',
   },
   postTitleText: {
     fontSize: 22,

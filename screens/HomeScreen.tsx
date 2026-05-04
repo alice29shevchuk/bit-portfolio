@@ -4,6 +4,7 @@ import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -29,6 +30,8 @@ import { resolveDisplayName } from '@/utils/displayName';
 const TASK_CARD_ART = require('../assets/images/home-test-task.png');
 const BEFORE_CARD_LINK_ICON = require('../assets/images/before-card-link-icon.svg');
 const HOME_SCREEN_BG = '#F2F3F5';
+const HOME_HERO_FALLBACK_HEIGHT = 250;
+const CONTENT_GAP_BELOW_HOME_HERO = 24;
 
 function capitalizeFirstLetter(text: string): string {
   const s = text.trim();
@@ -43,6 +46,7 @@ type Props = CompositeScreenProps<
 
 export default function HomeScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const [heroHeight, setHeroHeight] = useState(0);
   const user = useSelector((s: RootState) => s.auth.user);
   const override = useSelector((s: RootState) => s.settings.displayNameOverride);
   const name = resolveDisplayName(user, override) || '—';
@@ -52,23 +56,19 @@ export default function HomeScreen({ navigation }: Props) {
     navigation.navigate('PostDetail', { postId: id });
   };
 
+  const scrollPaddingTop =
+    heroHeight > 0
+      ? heroHeight + CONTENT_GAP_BELOW_HOME_HERO
+      : HOME_HERO_FALLBACK_HEIGHT + CONTENT_GAP_BELOW_HOME_HERO;
+
   return (
     <View style={styles.root}>
-      <LinearGradient
-        colors={[colors.accent, colors.accentLight]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.hero}
-      >
-        <SafeAreaView edges={['top']} style={styles.heroSafe}>
-          <Text style={styles.heroSmall}>{t('home.welcomeLine')}</Text>
-          <Text style={styles.heroName}>{name}</Text>
-        </SafeAreaView>
-      </LinearGradient>
-
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollInner}
+        contentContainerStyle={[
+          styles.scrollInner,
+          { paddingTop: scrollPaddingTop },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.taskCard}>
@@ -179,16 +179,44 @@ export default function HomeScreen({ navigation }: Props) {
           ))}
         </View>
       </ScrollView>
+
+      <View style={styles.heroOverlay} pointerEvents="box-none">
+        <View
+          pointerEvents="none"
+          collapsable={false}
+          onLayout={(e) => setHeroHeight(e.nativeEvent.layout.height)}
+        >
+          <LinearGradient
+            colors={[colors.accent, colors.accentLight]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.hero}
+          >
+            <SafeAreaView edges={['top']} style={styles.heroSafe}>
+              <Text style={styles.heroSmall}>{t('home.welcomeLine')}</Text>
+              <Text style={styles.heroName}>{name}</Text>
+            </SafeAreaView>
+          </LinearGradient>
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: HOME_SCREEN_BG },
+  heroOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 2,
+    elevation: 8,
+  },
   hero: {
     borderBottomLeftRadius: 36,
     borderBottomRightRadius: 36,
-    height: 250,
+    height: HOME_HERO_FALLBACK_HEIGHT,
     overflow: 'hidden',
   },
   heroSafe: {
@@ -213,13 +241,11 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flex: 1,
-    marginTop: -12,
-    backgroundColor: 'transparent',
+    backgroundColor: HOME_SCREEN_BG,
   },
   scrollInner: {
     paddingHorizontal: 20,
     paddingBottom: 100,
-    paddingTop: 20,
   },
   taskCard: {
     backgroundColor: colors.card,
