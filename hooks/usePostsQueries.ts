@@ -37,7 +37,6 @@ export async function prefetchPostsDetailAndCommentsBatched(
   posts: JsonPlaceholderPost[],
   options?: { limit?: number; concurrency?: number },
 ): Promise<void> {
-  /** By default prefetch details for every post in this list (cap with `limit` if needed). */
   const limit = options?.limit ?? posts.length;
   const concurrency = Math.max(1, options?.concurrency ?? 4);
   const slice = posts.slice(0, limit);
